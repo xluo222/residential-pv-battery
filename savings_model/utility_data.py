@@ -46,3 +46,4 @@ print(df.sort_values(by=["stateid", "period"])) # sorts values by state and year
 df.to_csv("utility_data.csv", index=False)
 
 # would be really cool to create a model that takes inputs (for state year) and tells you if it's feasible to create a pv system + battery depending on your circumstances
+Mark set
