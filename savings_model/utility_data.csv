@@ -1,4 +1,4 @@
-period,stateid,stateDescription,price,growth_rate
+period,stateid,stateDescription,price,growth_rate (%)
 2010,AK,Alaska,16.26,
 2011,AK,Alaska,17.62,8.364083640836405
 2012,AK,Alaska,17.88,1.4755959137343844
