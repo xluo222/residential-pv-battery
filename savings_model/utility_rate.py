@@ -2,6 +2,9 @@ import requests
 import pandas as pd
 import matplotlib.pyplot as plt 
 from statsmodels.tsa.arima.model import ARIMA
+import warnings
+
+warnings.filterwarnings("ignore")
 
 API_KEY = "xMm34KQDGuPoeSFb32txXesPxUJnngi47VnobkdZ" # remember to remove this!
 
@@ -58,24 +61,52 @@ print (df)
 
 df.to_csv("utility_data.csv", index=False)
 
-# testing california for now
-model = ARIMA(ca["price"], order=(1,1,1))
+forecast_results = []
 
-results = model.fit()
+# Run the ARIMA forecasting model for each state
+for state in df["stateid"].unique():
+    try: 
+        state_df = df[df["stateid"] == state].copy()
 
-forecast = results.forecast(steps=15)
+        model = ARIMA(
+            state_df["price"],
+            order=(1,1,1)
+        )
 
-future_years = range(2026, 2050)
+        results = model.fit()
 
-plt.plot(ca["period"], ca["price"], label="Historical Prices")
-plt.plot(future_years, forecast, label="Forecast", linestyle='--')
+        forecast = results.forecast(steps=25)
 
-plt.title("California Residential Electricity Prices")
-plt.xlabel("Year")
-plt.ylabel("price(cents/kWh)")
-plt.legend()
+        future_years = range(2026, 2051)
+    
+        temp = pd.DataFrame({
+            "stateid": state,
+            "year": future_years,
+            "forecast_price": forecast
+        })
 
-plt.show()
+        forecast_results.append(temp)
+
+    except Exception as e:
+        print(state, "failed:", e)
+
+
+forecast_df = pd.concat(
+    forecast_results,
+    ignore_index=True
+)
+
+print (forecast_df)
+
+#plt.plot(ca["period"], ca["price"], label="Historical Prices")
+#plt.plot(future_years, forecast, label="Forecast", linestyle='--')
+
+#plt.title("California Residential Electricity Prices")
+#plt.xlabel("Year")
+#plt.ylabel("price(cents/kWh)")
+#plt.legend()
+
+#plt.show()
 
 
 # would be really cool to create a model that takes inputs (for state year) and tells you if it's feasible to create a pv system + battery depending on your circumstances
