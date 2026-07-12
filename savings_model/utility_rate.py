@@ -98,7 +98,7 @@ forecast_df = pd.concat(
 
 print (forecast_df)
 
-forecast_df.to_csv("forecast_data
+forecast_df.to_csv("forecast_prices.csv", index=False)
 
 #plt.plot(ca["period"], ca["price"], label="Historical Prices")
 #plt.plot(future_years, forecast, label="Forecast", linestyle='--')
