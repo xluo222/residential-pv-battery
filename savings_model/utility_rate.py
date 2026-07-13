@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 import warnings
 
+# ignores the additional warnings from the ARIMA model 
 warnings.filterwarnings("ignore")
 
 API_KEY = "xMm34KQDGuPoeSFb32txXesPxUJnngi47VnobkdZ" # remember to remove this!
@@ -34,6 +35,7 @@ states = [
 for state in states:
     url += f"&facets[stateid][]={state}"
 
+# result of get request from api
 response = requests.get(url)
 
 print(response.status_code) # HTTP status code: 200 if request is successful, 4xx if there's an error
@@ -51,7 +53,7 @@ df = df.drop(columns =["price-units", "sectorid", "sectorName"]) # removes these
 # converts strings in price column to numbers
 df["price"] = pd.to_numeric(df["price"])
 
-# calculates year-to-year growth rate, returns decimal
+# calculates year-to-year growth rate, returns percentage
 df["growth_rate (%)"] = (
     df.groupby("stateid")["price"]
       .pct_change() * 100
@@ -59,11 +61,12 @@ df["growth_rate (%)"] = (
 
 print (df)
 
+# saves the dataframe to utility_data.csv without index numbers
 df.to_csv("utility_data.csv", index=False)
 
 forecast_results = []
 
-# Run the ARIMA forecasting model for each state
+# Run the ARIMA time series  model for each state to forecast future utility rates (next 25 years). Goes through each state alphabetically
 for state in df["stateid"].unique():
     try: 
         state_df = df[df["stateid"] == state].copy()
@@ -77,7 +80,7 @@ for state in df["stateid"].unique():
 
         forecast = results.forecast(steps=25)
 
-        future_years = range(2026, 2051)
+        future_years = range(2025, 2050)
     
         temp = pd.DataFrame({
             "stateid": state,
@@ -90,7 +93,6 @@ for state in df["stateid"].unique():
     except Exception as e:
         print(state, "failed:", e)
 
-
 forecast_df = pd.concat(
     forecast_results,
     ignore_index=True
@@ -100,15 +102,41 @@ print (forecast_df)
 
 forecast_df.to_csv("forecast_prices.csv", index=False)
 
-#plt.plot(ca["period"], ca["price"], label="Historical Prices")
-#plt.plot(future_years, forecast, label="Forecast", linestyle='--')
+# creates a graph with california's rates from 2010-2051 using its historical data and forecasted prices
+state = "CA"
+history = df[df["stateid"] == state]
+history["period"] = pd.to_numeric(history["period"]) # converts years from strings to numbers
+forecast = forecast_df[forecast_df["stateid"] == state]
 
-#plt.title("California Residential Electricity Prices")
-#plt.xlabel("Year")
-#plt.ylabel("price(cents/kWh)")
-#plt.legend()
+plt.figure(figsize=(10,6))
 
-#plt.show()
+# draws the historical prices line
+plt.plot(
+    history["period"],
+    history["price"],
+    label="Historical Prices",
+    linewidth=2
+)
+
+# draws forecasted prices as a dashed line
+plt.plot(
+    forecast["year"],
+    forecast["forecast_price"],
+    label="Forecast",
+    linestyle="--",
+    linewidth=2
+)
+
+plt.title("California Residential Electricity Prices")
+plt.xlabel("Year")
+plt.ylabel("price(cents/kWh)")
+plt.legend()
+
+plt.grid(True)
+
+plt.savefig("CA_forecast_graph.png", dpi=300)
+plt.show()
+plt.close()
 
 
 # would be really cool to create a model that takes inputs (for state year) and tells you if it's feasible to create a pv system + battery depending on your circumstances
