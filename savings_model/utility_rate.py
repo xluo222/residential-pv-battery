@@ -80,7 +80,7 @@ for state in df["stateid"].unique():
 
         forecast = results.forecast(steps=25)
 
-        future_years = range(2025, 2050)
+        future_years = range(2026, 2051)
     
         temp = pd.DataFrame({
             "stateid": state,
@@ -103,7 +103,7 @@ print (forecast_df)
 forecast_df.to_csv("forecast_prices.csv", index=False)
 
 # creates a graph with california's rates from 2010-2051 using its historical data and forecasted prices
-state = "CA"
+state = "VA"
 history = df[df["stateid"] == state]
 history["period"] = pd.to_numeric(history["period"]) # converts years from strings to numbers
 forecast = forecast_df[forecast_df["stateid"] == state]
@@ -127,14 +127,14 @@ plt.plot(
     linewidth=2
 )
 
-plt.title("California Residential Electricity Prices")
+plt.title("Virginia Residential Electricity Prices")
 plt.xlabel("Year")
 plt.ylabel("price(cents/kWh)")
 plt.legend()
 
 plt.grid(True)
 
-plt.savefig("CA_forecast_graph.png", dpi=300)
+plt.savefig("VA_forecast_graph.png", dpi=300)
 plt.show()
 plt.close()
 
