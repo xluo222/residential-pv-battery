@@ -11,7 +11,7 @@ states = gpd.read_file(
     "cb_2025_us_all_500k/cb_2025_us_state_500k.shp"
 )
 
-# prints locations of the state boundaries and the shape of each state
+# prints geographical locations of the state boundaries and the shape of each state
 print(states.head())
 
 # four chosen states for our case study
@@ -100,7 +100,7 @@ for _, row in points_df.iterrows():
         "latitude": row["latitude"],
         "longitude": row["longitude"],
         
-          # Annual Global Horizontal Irradiance
+          # Annual Global Horizontal Irradiance (w/m^2)
         "ghi": data["outputs"]["avg_ghi"]["annual"]
     })
 
@@ -144,7 +144,10 @@ solar_gdf.plot(
     column="ghi",
     cmap="YlOrRd",
     legend=True,
-    markersize=20
+    markersize=20,
+    legend_kwds={
+        "shrink": 0.5
+    }
 )
 
 plt.title("Annual Solar Resource Potential in GHI (k/m^2)")
