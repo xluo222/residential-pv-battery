@@ -150,7 +150,11 @@ solar_gdf.plot(
     }
 )
 
-plt.title("Annual Solar Resource Potential in GHI (k/m^2)")
+plt.title(
+    "Annual Average Daily Global Horizontal Irradiance (kWh/m^2/day)\n"
+    "Washington, California, Nevada, and Massachusetts"
+)
+
 plt.xlabel("Longitude")
 plt.ylabel("Latitude")
 
