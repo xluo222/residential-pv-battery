@@ -166,4 +166,4 @@ plt.savefig(
 
 plt.close()
 
-# takes around five minutes to generate the solar resources at all cordinates and convert them into a heat map.
+# takes around two-three minutes to generate the solar resources at all cordinates and convert them into a heat map.
