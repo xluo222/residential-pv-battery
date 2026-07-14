@@ -15,21 +15,16 @@ url = (
     "&frequency=annual"
     "&data[0]=price"
     "&facets[sectorid][]=RES"
-    "&start=2010"
+    "&start=2001"
     "&end=2026"
 )
 
-states = [
-    "AK","AL","AR","AZ","CA","CO",
-    "CT","DC","DE","FL","GA","HI",
-    "IA","ID","IL","IN","KS","KY",
-    "LA","MA","MD","ME","MI","MN",
-    "MO","MS","MT","NC","ND","NE",
-    "NH","NJ","NM","NV","NY","OH",
-    "OK","OR","PA","RI","SC","SD",
-    "TN","TX","UT","VA","VT","WA",
-    "WI","WV","WY"
+states = ["CA",
+          "NV",
+          "WA",
+          "MA"
 ]
+
 
 # adds all the states above to the url
 for state in states:
@@ -103,7 +98,7 @@ print (forecast_df)
 forecast_df.to_csv("forecast_prices.csv", index=False)
 
 # creates a graph with california's rates from 2010-2051 using its historical data and forecasted prices
-state = "VA"
+state = "CA"
 history = df[df["stateid"] == state]
 history["period"] = pd.to_numeric(history["period"]) # converts years from strings to numbers
 forecast = forecast_df[forecast_df["stateid"] == state]
@@ -127,16 +122,13 @@ plt.plot(
     linewidth=2
 )
 
-plt.title("Virginia Residential Electricity Prices")
+plt.title("California Residential Electricity Prices")
 plt.xlabel("Year")
 plt.ylabel("price(cents/kWh)")
 plt.legend()
 
 plt.grid(True)
 
-plt.savefig("VA_forecast_graph.png", dpi=300)
+plt.savefig("CA_forecast_graph.png", dpi=300)
 plt.show()
-plt.close()
-
-
-# would be really cool to create a model that takes inputs (for state year) and tells you if it's feasible to create a pv system + battery depending on your circumstances
+plt.close() 
