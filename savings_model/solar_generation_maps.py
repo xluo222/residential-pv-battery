@@ -1,4 +1,5 @@
 import requests
+import time
 import pandas as pd
 import geopandas as gpd
 import numpy as np
@@ -10,6 +11,7 @@ states = gpd.read_file(
     "cb_2025_us_all_500k/cb_2025_us_state_500k.shp"
 )
 
+# prints locations of the state boundaries and the shape of each state
 print(states.head())
 
 # four chosen states for our case study
@@ -35,10 +37,10 @@ for _, row in states.iterrows():
     minx, miny, maxx, maxy = row.geometry.bounds
 
     # generates longitudes every 0.5°, np.arange() creates numbers within range
-    for long in np.arange(minx, maxx, 0.5):
+    for long in np.arange(minx, maxx, 1):
 
         # generates latitudes every 0.5°, np.arange() creates numbers within range
-        for lat in np.arange(miny, maxy, 0.5):
+        for lat in np.arange(miny, maxy, 1):
             
             point = Point(long, lat)
 
@@ -55,16 +57,18 @@ points_df = pd.DataFrame(points)
     
 API_KEY = "HUPJuUy6lChNXWDLtQH2szASoqsjFieVX8gt9GLZ"
 
-def get_solar_generation(lat, lon):
+# returns the solar resource for the point (using latitude and longitude)
+def get_solar_resource(lat, lon):
     url = "https://developer.nlr.gov/api/solar/solar_resource/v1.json"
 
-    # creates dictionary to store points
+    # creates dictionary to store point
     parameters = {
         "api_key": API_KEY,
         "lat": lat,
         "lon": lon
     }
-    
+
+    # request to the NLR server for the solar resource at said location
     response = requests.get(
         url,
         params=parameters,
@@ -78,14 +82,16 @@ results = []
 # loops through every coordinate
 for _, row in points_df.iterrows():
 
-    data = get_solar_generation(
+    data = get_solar_resource(
         row["latitude"],
         row["longitude"]
     )
-
-    # skip failed API requests
+    
     if "outputs" not in data:
-        print("API failed for:", row["latitude"], row["longitude"])
+        print("API failed for:",
+              row["latitude"],
+              row["longitude"])
+        print(data)
         continue
 
     results.append({
@@ -95,21 +101,15 @@ for _, row in points_df.iterrows():
         "longitude": row["longitude"],
         
           # Annual Global Horizontal Irradiance
-        "ghi":
-        data["outputs"]["avg_ghi"]["annual"],
-
-        # Annual Direct Normal Irradiance
-        "dni":
-        data["outputs"]["avg_dni"]["annual"],
-
-        # Annual irradiance for panels tilted at latitude
-        "lat_tilt":
-        data["outputs"]["avg_lat_tilt"]["annual"]
-
+        "ghi": data["outputs"]["avg_ghi"]["annual"]
     })
 
 
 solar_df = pd.DataFrame(results)
+
+print(solar_df.head())
+print("Successful points:", len(solar_df))
+print("Failed points:", len(points_df) - len(solar_df))
 
 solar_df.to_csv(
     "solar_generation_points.csv",
@@ -117,6 +117,8 @@ solar_df.to_csv(
 )   
     
 # creates heat map with darker points representing locations with higher solar resources and lighter points being locations with lower solar resources
+
+# creates a GeoDataFrame from the solar 
 solar_gdf = gpd.GeoDataFrame(
     solar_df,
     geometry=gpd.points_from_xy(
@@ -126,15 +128,28 @@ solar_gdf = gpd.GeoDataFrame(
     crs="EPSG:4326"
 )
 
+# create figure and axes
+fig, ax = plt.subplots(figsize=(10,10))
+
+# plot state boundaries
+states.boundary.plot(
+    ax=ax,
+    color="black",
+    linewidth=1
+)
+
+# plot solar resource points 
 solar_gdf.plot(
+    ax=ax,
     column="ghi",
     cmap="YlOrRd",
     legend=True,
-    figsize=(10,8),
     markersize=20
 )
 
-plt.title("Solar Resource Potential (GHI)")
+plt.title("Annual Solar Resource Potential in GHI (k/m^2)")
+plt.xlabel("Longitude")
+plt.ylabel("Latitude")
 
 plt.savefig(
     "solar_map.png",
@@ -143,3 +158,5 @@ plt.savefig(
 )
 
 plt.close()
+
+# takes around five minutes to generate the solar resources at all cordinates and convert them into a heat map.
