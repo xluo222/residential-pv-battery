@@ -37,10 +37,10 @@ for _, row in states.iterrows():
     minx, miny, maxx, maxy = row.geometry.bounds
 
     # generates longitudes every 0.5°, np.arange() creates numbers within range
-    for long in np.arange(minx, maxx, 1):
+    for long in np.arange(minx, maxx, 0.5):
 
         # generates latitudes every 0.5°, np.arange() creates numbers within range
-        for lat in np.arange(miny, maxy, 1):
+        for lat in np.arange(miny, maxy, 0.5):
             
             point = Point(long, lat)
 
