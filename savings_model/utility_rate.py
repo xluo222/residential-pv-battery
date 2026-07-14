@@ -61,6 +61,15 @@ df.to_csv("utility_data.csv", index=False)
 
 forecast_results = []
 
+test = [
+    (1,1,0),
+    (0,1,1),
+    (1,1,1),
+    (2,1,1),
+    (2,1,2),
+    (3,1,1)
+]
+    
 # Run the ARIMA time series  model for each state to forecast future utility rates (next 25 years). Goes through each state alphabetically
 for state in df["stateid"].unique():
     try: 
@@ -68,7 +77,7 @@ for state in df["stateid"].unique():
 
         model = ARIMA(
             state_df["price"],
-            order=(1,1,1)
+            order=(2,1,1)
         )
 
         results = model.fit()
