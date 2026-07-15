@@ -82,9 +82,9 @@ for state in df["stateid"].unique():
 
         results = model.fit()
 
-        forecast = results.forecast(steps=25)
+        forecast = results.forecast(steps=24
 
-        future_years = range(2026, 2051)
+        future_years = range(2026, 2050)
     
         temp = pd.DataFrame({
             "stateid": state,
