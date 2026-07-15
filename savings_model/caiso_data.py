@@ -13,7 +13,7 @@ if not os.path.exists(folder):
 url = "https://oasis.caiso.com/oasisapi/SingleZip"
 
 start = datetime(2015, 1, 1)
-end = datetime(2025, 12, 31)
+end = datetime(2015, 1, 2)
 
 current = start
 
@@ -76,5 +76,11 @@ while current <= end:
     # Move to next month
     current = next_month
 
+print(response.url)
+print(response.status_code)
+print(response.text[:1000])
+import zipfile
 
+with zipfile.ZipFile(filename, "r") as z:
+    print(z.namelist())
 print("All downloads complete!")
