@@ -20,3 +20,13 @@ pse_schedule_df = pd.read_csv(
 
 print(pse_schedule_df)
 
+spp_rates_df = pd.read_csv("spp_tou_rates.csv")
+
+print(spp_rates_df)
+
+spp_schedule_df = pd.read_csv(
+    "spp_weekday.csv"
+)
+
+print(spp_schedule_df)
+
