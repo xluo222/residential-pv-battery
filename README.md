@@ -8,6 +8,7 @@ You will need to install these following packages on python to successfully run 
 * matplotlib
 * pandas
 * geopandas
+  
 Use this example to install each package:
 ```
 sudo apt install numpy
