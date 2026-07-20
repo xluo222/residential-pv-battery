@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # reads the load data from San Diego (SDGE, Southern California)
 load = pd.read_csv(
-    "RESIDENTIAL_LOAD_DATA_E_PLUS_OUTPUT (2)/BASE/USA_CA_San.Diego-Miramar.NAS.722930_TMY3_BASE.csv"
+    "USA_CA_San.Diego-Miramar.NAS.722930_TMY3_BASE.csv"
 )
 
 # renames the columns for later calculations
@@ -13,7 +13,6 @@ load = load.rename(columns={
     "Electricity:Facility [kW](Hourly)":"load_kw"
 })
 
-# values are hourly averages, treat them as hourly energy for calculations
 load["load_kwh"] = load ["load_kw"]
 
 # cleans up the spaces in the timestamp strings
@@ -29,7 +28,7 @@ date_part = pd.to_datetime(
     format="%Y/%m/%d"
 )
 
-# extracts the hour
+# extracts the hour and casts to integer
 hour_part = raw_datetime.str[6:8].astype(int)
 
 # converts text-based time and time strings into official datetime objects
@@ -38,7 +37,7 @@ load["datetime"] = date_part + pd.to_timedelta(
     unit="h"
 )
 
-load["month"] = load["datetime"].dt.month
+load["month"] = date_part.dt.month
 load["hour"] = (hour_part - 1) % 24
 
 # organize by seasons
@@ -54,54 +53,68 @@ def season(month):
 
 load["season"] = load["month"].apply(season)
 
-# average by hour and by season (summer, winter, and annual patterns)
-summer = (
-    load[load["season"]=="summer"]
-    .groupby("hour")["load_kwh"]
-    .mean()
-    .reset_index()
-)
-
-winter = (
-    load[load["season"]=="winter"]
-    .groupby("hour")["load_kwh"]
-    .mean()
-    .reset_index()
-)
-
-annual = (
-    load.groupby("hour")["load_kwh"]
-    .mean()
-    .reset_index()
-)
-
 # function for applying Fourier transform to 24-hour averages
-# Fourier  breaks down time-based signals into individual sine and cosine frequency components and reveals which frequencies are present, and how strong they are. Used for finding summer, winter, and annual usage patterns by the hour here. 
-def fourier_smooth(profile_df, harmonics=3):
-    
-    # extracts load numbers into a NumPy array
-    values = profile_df["load_kwh"].values
+# Fourier breaks down time-based signals into individual sine and cosine frequency components and reveals which frequencies are present, and how strong they are. Used for finding summer, winter, and annual usage patterns by smoothing out the load profile
+def fourier_smooth(profile_df, harmonics): # harmonics represents how many Fourier frequency components to keep
 
-    # finds the waves
+    profile_df = profile_df.copy()
+    
+    # extracts all hourly load values and into NumPy array
+    values = profile_df["load_kwh"].to_numpy()
+
+    # fourier transform
     fft = np.fft.fft(values)
 
+    # empty spectrum
     filtered = np.zeros_like(fft)
+
+    # keep the mean load
     filtered[0] = fft[0]
 
-    # builds the curve using three waves
+    # keeps the lowest-frequency harmonics (low-frequency -> patterns in signal)
     for i in range(1, harmonics + 1):
-        # fourier coefficients come in pairs
+        # remember fourier coefficients come in pairs!
         filtered[i] = fft[i]
         filtered[-i] = fft[-i]
-
+        
+    # reconstruct the smoothed signal, converts from spectrum to an hourly load signal 
     profile_df["smooth"] = np.fft.ifft(filtered).real
 
     return profile_df
 
-summer = fourier_smooth(summer)
-winter = fourier_smooth(winter)
-annual = fourier_smooth(annual)
+load = fourier_smooth(load, 500)
 
+# create summer profile (using averaged smoothed out Fourier values)
+summer = (
+    load.loc[load["season"] == "summer"]
+    .groupby("hour", as_index=False)
+    .agg({
+        "load_kwh": "mean",
+        "smooth": "mean"
+    })
+)
+
+# create winter profile
+winter = (
+    load.loc[load["season"] == "winter"]
+    .groupby("hour", as_index=False)
+    .agg({
+        "load_kwh": "mean",
+        "smooth": "mean"
+    })
+)
+
+# create annual profile
+annual = (
+    load
+    .groupby("hour", as_index=False)
+    .agg({
+        "load_kwh": "mean",
+        "smooth": "mean"
+    })
+)
+
+# prints the summer, winter, and annual Fourier-smoothed profiles
 print("\nSummer profile:")
 print(summer)
 
@@ -111,16 +124,54 @@ print(winter)
 print("\nAnnual profile:")
 print(annual)
 
-# plot both the original hourly averages and the Fourier-smoothed profiles
+# functions used to calculate daily costs of electricity according to the Fourier-smoothed residential load values from above
+from tariffs import (
+    calculate_daily_cost,
+    get_summer_weekday_rate,
+    get_winter_weekday_rate,
+)
+
+summer = calculate_daily_cost(
+    summer,
+    get_summer_weekday_rate
+)
+
+winter = calculate_daily_cost(
+    winter,
+    get_winter_weekday_rate
+)
+
+# while we have the annual Fourier-smoothed load profiles, there isn't a consistent time-of-use rate to apply them to, since there are variety weekday usage charge schedules depending on the time of the year.
+
+summer_daily_cost = summer["hourly_cost"].sum()
+winter_daily_cost = winter["hourly_cost"].sum()
+
+# creates a summary DataFrame with the two seasons, their daily load based on Fourier-smoothed representative profiles, and their estimated daily TOU cost
+summary = pd.DataFrame({
+    "Season": ["Summer", "Winter"],
+    "Daily Load (kWh)": [
+        summer["load_kwh"].sum(),
+        winter["load_kwh"].sum()
+    ],
+    "Daily Cost ($)": [
+        summer_daily_cost,
+        winter_daily_cost
+    ]
+})
+
+print(summary)
+
+# plot the Fourier-smoothed average profiles (commented out the averages of profiles, used originally to compare against the Fourier-smoothed values). loads as a png file. 
+
 plt.figure(figsize=(10, 6))
 
-plt.plot(
-    summer["hour"],
-    summer["load_kwh"],
-    marker="o",
-    linestyle="--",
-    label="Summer average"
-)
+#plt.plot(
+    #summer["hour"],
+    #summer["load_kwh"],
+    #marker="o",
+    #linestyle="--",
+    #label="Summer average"
+#)
 
 plt.plot(
     summer["hour"],
@@ -129,13 +180,13 @@ plt.plot(
     label="Summer Fourier-smoothed"
 )
 
-plt.plot(
-    winter["hour"],
-    winter["load_kwh"],
-    marker="o",
-    linestyle="--",
-    label="Winter average"
-)
+#plt.plot(
+    #winter["hour"],
+    #winter["load_kwh"],
+    #marker="o",
+    #linestyle="--",
+    #label="Winter average"
+#)
 
 plt.plot(
     winter["hour"],
@@ -144,13 +195,13 @@ plt.plot(
     label="Winter Fourier-smoothed"
 )
 
-plt.plot(
-    annual["hour"],
-    annual["load_kwh"],
-    marker="o",
-    linestyle="--",
-    label="Annual average"
-)
+#plt.plot(
+    #annual["hour"],
+    #annual["load_kwh"],
+    #marker="o",
+    #linestyle="--",
+    #label="Annual average"
+#)
 
 plt.plot(
     annual["hour"],
@@ -168,5 +219,4 @@ plt.legend()
 plt.tight_layout()
 
 plt.savefig("san_diego_load_profiles.png", dpi=300)
-print("Plot saved as san_diego_load_profiles.png")    
-
+print("Plot saved as san_diego_load_profiles.png")
