@@ -128,7 +128,7 @@ print(annual)
 summer_solar = pd.read_csv("summer_solar_profile.csv")
 winter_solar = pd.read_csv("winter_solar_profile.csv")
 
-# merge the summer + winter solar PV generation profiles
+# merge the summer + winter solar PV generation profiles with the load profiles
 summer_combined = summer.merge(
     summer_solar,
     on="hour",
@@ -241,3 +241,55 @@ plt.tight_layout()
 
 plt.savefig("san_diego_load_profiles.png", dpi=300)
 print("Plot saved as san_diego_load_profiles.png")
+ 
+# creates a dataframe organized by the hour with the Fourier-smoothed residential load profile, solar generation profile (AC system output), and the time-of-use tariff rate. Divided between summer and winter. All values rounded to the nearest thousandth!
+summer_table = pd.DataFrame({
+    "Hour": summer_combined["hour"],
+    "Load (kWh)": summer_combined["smooth"],
+    "Solar (kWh)": summer_combined["solar_kwh"],
+    "TOU Rate ($/kWh)": summer_combined["tou_rate"]
+})
+
+winter_table = pd.DataFrame({
+    "Hour": winter_combined["hour"],
+    "Load (kWh)": winter_combined["smooth"],
+    "Solar (kWh)": winter_combined["solar_kwh"],
+    "TOU Rate ($/kWh)": winter_combined["tou_rate"]
+})
+
+# graph the two tables above (one for winter, one for summer)
+fig, ax = plt.subplots(figsize=(8, 8))
+
+ax.axis("off")
+
+table = ax.table(
+    cellText=summer_table.round(3).values,
+    colLabels=summer_table.columns,
+    loc="center"
+)
+
+table.auto_set_font_size(False)
+table.set_fontsize(9)
+table.scale(1.2, 1.4)
+
+plt.title("Representative Summer Profile (Weekday)")
+plt.savefig("summer_profile_table.png", dpi=300, bbox_inches="tight")
+print("Plot saved as summer_profile_table.png")
+
+fig, ax = plt.subplots(figsize=(8, 8))
+
+ax.axis("off")
+
+table = ax.table(
+    cellText=winter_table.round(3).values,
+    colLabels=winter_table.columns,
+    loc="center"
+)
+
+table.auto_set_font_size(False)
+table.set_fontsize(9)
+table.scale(1.2, 1.4)
+
+plt.title("Representative Winter Profile (Weekday)")
+plt.savefig("winter_profile_table.png", dpi=300, bbox_inches="tight")
+print("Plot saved as winter_profile_table.png")
