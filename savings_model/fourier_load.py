@@ -124,6 +124,23 @@ print(winter)
 print("\nAnnual profile:")
 print(annual)
 
+# read the summer and winter solar profiles from solar_generation_profiles.py. summer and winter daily solar generation profiles measured in terms of AC system output (
+summer_solar = pd.read_csv("summer_solar_profile.csv")
+winter_solar = pd.read_csv("winter_solar_profile.csv")
+
+# merge the summer + winter solar PV generation profiles
+summer_combined = summer.merge(
+    summer_solar,
+    on="hour",
+    how="inner" # only keeps rows where the key exists in both dataframes
+)
+
+winter_combined = winter.merge(
+    winter_solar,
+    on="hour",
+    how="inner",
+)
+
 # functions used to calculate daily costs of electricity according to the Fourier-smoothed residential load values from above
 from tariffs import (
     calculate_daily_cost,
@@ -131,27 +148,31 @@ from tariffs import (
     get_winter_weekday_rate,
 )
 
-summer = calculate_daily_cost(
-    summer,
+summer_combined= calculate_daily_cost(
+    summer_combined,
     get_summer_weekday_rate
 )
 
-winter = calculate_daily_cost(
-    winter,
+winter_combined = calculate_daily_cost(
+    winter_combined,
     get_winter_weekday_rate
 )
 
 # while we have the annual Fourier-smoothed load profiles, there isn't a consistent time-of-use rate to apply them to, since there are variety weekday usage charge schedules depending on the time of the year.
 
-summer_daily_cost = summer["hourly_cost"].sum()
-winter_daily_cost = winter["hourly_cost"].sum()
+summer_daily_cost = summer_combined["hourly_cost"].sum()
+winter_daily_cost = winter_combined["hourly_cost"].sum()
 
-# creates a summary DataFrame with the two seasons, their daily load based on Fourier-smoothed representative profiles, and their estimated daily TOU cost
+# creates a summary DataFrame with the two seasons, their daily load based on Fourier-smoothed representative profiles,  their estimated daily TOU cost, and their daily solar generation (kWh)
 summary = pd.DataFrame({
     "Season": ["Summer", "Winter"],
     "Daily Load (kWh)": [
-        summer["load_kwh"].sum(),
-        winter["load_kwh"].sum()
+        summer_combined["load_kwh"].sum(),
+        winter_combined["load_kwh"].sum()
+    ],
+    "Daily Solar Generation (kWh)": [
+        summer_combined["solar_kwh"].sum(),
+        winter_combined["solar_kwh"].sum()
     ],
     "Daily Cost ($)": [
         summer_daily_cost,

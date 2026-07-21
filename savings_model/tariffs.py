@@ -52,14 +52,14 @@ def calculate_daily_cost(profile, rate_function):
 
     return profile
 
-# arranges the sdge (Southern California) time-of-use utility rates and the corresponding weekday schedule into a dataframe. prints them out as well for reference
-sdge_rates_df = pd.read_csv("sdge_tou_rates.csv")
+# arranges the sdge (Southern California) time-of-use utility rates and the corresponding weekday schedule into a dataframe. prints them out as well for reference (can be used to confirm the utility rates and schedule are accurate, but they are commented out later for purposes of clarity)
+#sdge_rates_df = pd.read_csv("sdge_tou_rates.csv")
 
-print(sdge_rates_df)
+#print(sdge_rates_df)
 
-sdge_schedule_df = pd.read_csv(
+#sdge_schedule_df = pd.read_csv(
     "sdge_weekday.csv"
-)
+#)
 
-print(sdge_schedule_df)
+#print(sdge_schedule_df)
 

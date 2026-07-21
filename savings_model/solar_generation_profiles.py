@@ -9,7 +9,7 @@ PVWATTS_URL = "https://developer.nlr.gov/api/pvwatts/v8.json"
 # download one typical year of hourly PV generation from PVWatts V8
 def get_hourly_solar_generation(latitude: float, longitude: float, pv_capacity_kw: float = 6.0, tilt: float = 25.0, azimuth: float = 180.0):
 
-    # set API
+    # set API key in terminal
     api_key = os.getenv("NREL_API_KEY")
 
     if not api_key:
@@ -49,7 +49,7 @@ def get_hourly_solar_generation(latitude: float, longitude: float, pv_capacity_k
         timeout=60
     )
 
-    print(response.raise_for_status()) # 200 if connection works, 4xx or 5xx if not
+    print(response.status_code) # 200 if connection works, 4xx or 5xx if not
     data = response.json()
     
     ac_watts = data["outputs"]["ac"]
@@ -64,7 +64,7 @@ def get_hourly_solar_generation(latitude: float, longitude: float, pv_capacity_k
         "solar_ac_w": ac_watts
     })
 
-    # each value is average AC power over a one-hour interval.
+    # each value is average AC system output power over a one-hour interval.
     # W ÷ 1000 = kW, and kW × 1 hour = kWh.
     solar["solar_kwh"] = solar["solar_ac_w"] / 1000
 
@@ -76,4 +76,58 @@ solar = get_hourly_solar_generation(
     pv_capacity_kw=6.0
 )
 
-print(solar)
+# adding timestamps and a datetime column 
+solar["datetime"] = pd.date_range(
+    start="2025-01-01 00:00:00",
+    periods=8760, # total number of hours in a year
+    freq="h"
+)
+
+solar["month"] = solar["datetime"].dt.month
+solar["hour"] = solar["datetime"].dt.hour
+solar["day_of_week"] = solar["datetime"].dt.dayofweek
+solar["is_weekday"] = solar["day_of_week"] < 5
+
+# same format as the tou tariffs. June to October is one price and November through May is another. 
+def season(month):
+    if month in [6,7,8,9,10]:
+        return "summer"
+    return "winter"
+
+solar["season"] = solar["month"].apply(season)
+
+weekday_solar = solar[solar["is_weekday"]]
+
+# organize by season
+seasonal_solar = (
+    weekday_solar
+    .groupby(["season", "hour"], as_index=False)
+    .agg(
+        solar_kwh=("solar_kwh", "mean")
+    )
+)
+
+summer_solar = (
+    seasonal_solar[seasonal_solar["season"] == "summer"]
+    .drop(columns="season")
+    .reset_index(drop=True)
+)
+
+winter_solar = (
+    seasonal_solar[seasonal_solar["season"] == "winter"]
+    .drop(columns="season")
+    .reset_index(drop=True)
+)
+
+summer_solar.to_csv(
+    "summer_solar_profile.csv",
+    index=False
+)
+
+winter_solar.to_csv(
+    "winter_solar_profile.csv",
+    index=False
+)
+
+
+
