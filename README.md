@@ -15,9 +15,28 @@ Use this example to install each package:
 pip install pandas
 ```
 
-Additionally, this model requires access to the National Renewable Energy Laboratory (NREL) PVWatts API. Please sign up for an API key here: https://developer.nlr.gov/signup/. Use this code to set the API key within your terminal: 
+Additionally, this model requires access to the National Renewable Energy Laboratory (NREL) PVWatts API for the solar generation profiles. Please sign up for an API key here: https://developer.nlr.gov/signup/. Keep in mind that API keys are unique and should not be shared with others. Use this code to set the API key within your terminal: 
 ```
 export NREL_API_KEY = "your_actual_api_key"
 ```
 
 # Reproducibility 
+To get this program and its necessary files, run this:
+```
+git clone https://github.com/xluo222/residential-pv-battery.git
+cd residential-pv-battery
+```
+
+# Running code
+To view results from the cost optimization model for battery storage, run this code:
+```
+python3 cost_optimization.py
+```
+To see the calculations for the Fourier-smoothed residential load profiles, run this:
+```
+python3 fourier_load.py
+```
+and to see the graphed daily load profiles, run this:
+```
+xdg-open san_diego_load_profiles.png
+```
