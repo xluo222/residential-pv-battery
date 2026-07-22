@@ -8,8 +8,16 @@ You will need to install these following packages on python in your terminal to 
 * matplotlib
 * pandas
 * geopandas
+* cvxpy
   
 Use this example to install each package:
 ```
 pip install pandas
 ```
+
+Additionally, this model requires access to the National Renewable Energy Laboratory (NREL) PVWatts API. Please sign up for an API key here: https://developer.nlr.gov/signup/. Use this code to set the API key within your terminal: 
+```
+export NREL_API_KEY = "your_actual_api_key"
+```
+
+# Reproducibility 
