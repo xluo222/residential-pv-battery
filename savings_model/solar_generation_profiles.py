@@ -42,7 +42,6 @@ def get_hourly_solar_generation(latitude: float, longitude: float, pv_capacity_k
         "radius": 100   # PVWatts searches within 100 miles
     }
 
-    # sends the request 
     response = requests.get(
         PVWATTS_URL,
         params=params,
@@ -59,7 +58,6 @@ def get_hourly_solar_generation(latitude: float, longitude: float, pv_capacity_k
             f"Expected 8,760 hourly values, received {len(ac_watts)}."
         )
 
-    # creates a dataframe with the list of hourly values
     solar = pd.DataFrame({
         "solar_ac_w": ac_watts
     })

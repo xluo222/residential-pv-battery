@@ -85,7 +85,7 @@ def optimize_battery_size(battery_capacity):
         "Solar (kWh)": solar,
         "Charge (kWh)": charge.value,
         "Discharge (kWh)": discharge.value,
-        "SOC (kWh)": soc.value[:-1],
+        "SOC End (kWh)": soc.value[1:],
         "Grid Import (kWh)": grid_import.value,
         "Grid Export (kWh)": grid_export.value,
         "Import Cost ($)": import_cost,
@@ -104,7 +104,9 @@ def optimize_battery_size(battery_capacity):
     
     print(results)
 
-    results.to_csv('results.csv', index=False)
+    results.to_csv(
+        f"winter_battery_{battery_capacity}kWh_results.csv",
+    )
     
     print("Total import cost: $", round(import_cost.sum(), 2))
     print("Total export credit: $", round(export_credit.sum(), 2))

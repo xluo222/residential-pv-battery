@@ -1,6 +1,6 @@
 import pandas as pd
 
-# time-of-use tariff costs are calculated depending on the hour and month and through these rates. each pricing period is represented in rate per kWh (kilowatt-hour or 1,000 watts of power running continously for one hour). uses rates listed here: https://apps.openei.org/USURDB/rate/view/6a45822d666a6ad1d40b4d0e#3__Energy
+# time-of-use tariff costs are calculated depending on the hour and month and through these rates: https://apps.openei.org/USURDB/rate/view/6a45822d666a6ad1d40b4d0e#3__Energy
 
 TOU_RATES = {
     1: 0.71598,
@@ -25,8 +25,7 @@ def get_summer_weekday_rate(hour):
         return TOU_RATES[1]
     else:
         return TOU_RATES[2]
-
-# returns the rate on a winter weekday depending on the hour. 12 am is equivalent to hour 0, and 11pm is hour 23. keep in mind that spring weekdays are the exact same rate. 
+ 
 def get_winter_weekday_rate(hour):
     if 0 <= hour < 6:
         return TOU_RATES[6]

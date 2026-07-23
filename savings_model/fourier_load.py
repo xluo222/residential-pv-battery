@@ -55,7 +55,7 @@ load["season"] = load["month"].apply(season)
 
 # function for applying Fourier transform to 24-hour averages
 # Fourier breaks down time-based signals into individual sine and cosine frequency components and reveals which frequencies are present, and how strong they are. Used for finding summer, winter, and annual usage patterns by smoothing out the load profile
-def fourier_smooth(profile_df, harmonics): # harmonics represents how many Fourier frequency components to keep
+def fourier_smooth(profile_df, harmonics):
 
     profile_df = profile_df.copy()
     
@@ -84,7 +84,7 @@ def fourier_smooth(profile_df, harmonics): # harmonics represents how many Fouri
 
 load = fourier_smooth(load, 500)
 
-# create summer profile (using averaged smoothed out Fourier values)
+# create summer profile 
 summer = (
     load.loc[load["season"] == "summer"]
     .groupby("hour", as_index=False)
@@ -158,7 +158,7 @@ winter_combined = calculate_daily_cost(
     get_winter_weekday_rate
 )
 
-# while we have the annual Fourier-smoothed load profiles, there isn't a consistent time-of-use rate to apply them to, since there are variety weekday usage charge schedules depending on the time of the year.
+# while we have the annual Fourier-smoothed load profile, there isn't a consistent time-of-use rate to apply them to, since there are variety weekday usage charge schedules depending on the time of the year.
 
 summer_daily_cost = summer_combined["hourly_cost"].sum()
 winter_daily_cost = winter_combined["hourly_cost"].sum()
@@ -250,7 +250,7 @@ summer_table = pd.DataFrame({
     "TOU Rate ($/kWh)": summer_combined["tou_rate"]
 })
 
-# saves it as a csv for usage in cost optimization model
+# saves it as a csv for use in cost optimization model
 summer_table.to_csv("summer_table.csv", index=False)
 
 winter_table = pd.DataFrame({
@@ -261,40 +261,3 @@ winter_table = pd.DataFrame({
 })
 
 winter_table.to_csv("winter_table.csv",index=False)
-
-# graph the two tables above (one for winter, one for summer)
-fig, ax = plt.subplots(figsize=(8, 8))
-
-ax.axis("off")
-
-table = ax.table(
-    cellText=summer_table.round(3).values,
-    colLabels=summer_table.columns,
-    loc="center"
-)
-
-table.auto_set_font_size(False)
-table.set_fontsize(9)
-table.scale(1.2, 1.4)
-
-plt.title("Representative Summer Profile (Weekday)")
-plt.savefig("summer_profile_table.png", dpi=300, bbox_inches="tight")
-print("Plot saved as summer_profile_table.png")
-
-fig, ax = plt.subplots(figsize=(8, 8))
-
-ax.axis("off")
-
-table = ax.table(
-    cellText=winter_table.round(3).values,
-    colLabels=winter_table.columns,
-    loc="center"
-)
-
-table.auto_set_font_size(False)
-table.set_fontsize(9)
-table.scale(1.2, 1.4)
-
-plt.title("Representative Winter Profile (Weekday)")
-plt.savefig("winter_profile_table.png", dpi=300, bbox_inches="tight")
-print("Plot saved as winter_profile_table.png")
