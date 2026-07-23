@@ -53,7 +53,6 @@ source .venv/bin/activate
 ```
 If using Windows, run this instead:
 ```
-powershell
 python -m venv .venv
 ```
 And to activate:
