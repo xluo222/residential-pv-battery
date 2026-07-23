@@ -40,3 +40,23 @@ and to see the graphed daily load profiles, run this:
 ```
 xdg-open san_diego_load_profiles.png
 ```
+
+# Creating a virtual environment
+If using Linux or MacOS, run this code:
+```
+bash
+python3 -m venv .venv
+```
+To activate the environment, run this:
+```
+source .venv/bin/activate
+```
+If using Windows, run this instead:
+```
+powershell
+python -m venv .venv
+```
+And to activate:
+```
+.venv\Scripts\activate.bat
+```
