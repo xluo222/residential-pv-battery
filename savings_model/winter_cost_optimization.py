@@ -10,18 +10,17 @@ solar = winter["Solar (kWh)"].values
 price = winter["TOU Rate ($/kWh)"].values
 export_price = 0.06
 
+# runs through the list of different battery sizes to test out how much they would save
 def optimize_battery_size(battery_capacity):
-    n = 24 # 24 hours, unknown charging amounts
+    n = 24
     power_limit = battery_capacity/2 # represents how much the battery can charge/discharge in an hour
     eta_c = 0.95 # efficiency charging/discharging
     eta_d = 0.95
 
     # optimization variables
     charge = cp.Variable(n, nonneg=True)
-    charge[0] == 0
     discharge = cp.Variable(n, nonneg=True)
-    discharge[0] == 0
-    soc = cp.Variable(n) # state of charge, remaining capacity available in a battery
+    soc = cp.Variable(n + 1) # state of charge, remaining capacity available in a battery
     grid_import = cp.Variable(n, nonneg=True)
     grid_export = cp.Variable(n, nonneg=True)
     
@@ -39,24 +38,31 @@ def optimize_battery_size(battery_capacity):
         discharge <= power_limit
     ]
 
+    constraints += [
+        charge[0] == 0,
+        discharge[0] == 0
+    ]
+
     # initial battery capacity (starts at the same place no matter battery size)
     constraints += [
         soc[0] == battery_capacity/2
     ]
     
-    for t in range(1,n):
+    for t in range(n):
         constraints += [
-            soc[t] == soc[t-1] + eta_c * charge[t] - discharge[t]/eta_d
+            soc[t+1] == soc[t] + eta_c * charge[t] - discharge[t]/eta_d
         ]
 
     # ensures the model doesn't empty the battery completely at night to reduce the day's bill and leaves it empty the next day
     constraints += [
-        soc[-1] == soc[0]
+        soc[n] == soc[0]
     ]
         
     for t in range(0,n):
         constraints += [
-            solar[t] + grid_import[t] + discharge[t]  == load[t] + charge[t] + grid_export[t]
+            solar[t] + grid_import[t] + discharge[t]  == load[t] + charge[t] + grid_export[t],
+
+            charge[t] + grid_export[t] <= solar[t]
         ]
 
     objective = cp.Minimize(
@@ -79,7 +85,7 @@ def optimize_battery_size(battery_capacity):
         "Solar (kWh)": solar,
         "Charge (kWh)": charge.value,
         "Discharge (kWh)": discharge.value,
-        "SOC (kWh)": soc.value,
+        "SOC (kWh)": soc.value[:-1],
         "Grid Import (kWh)": grid_import.value,
         "Grid Export (kWh)": grid_export.value,
         "Import Cost ($)": import_cost,
@@ -97,6 +103,8 @@ def optimize_battery_size(battery_capacity):
     results = results.round(3)
     
     print(results)
+
+    results.to_csv('results.csv', index=False)
     
     print("Total import cost: $", round(import_cost.sum(), 2))
     print("Total export credit: $", round(export_credit.sum(), 2))
@@ -120,19 +128,21 @@ cost_no_battery = np.sum(
 
 battery_sizes = [2, 6, 10, 12, 14, 18, 20]
 
-results = []
+battery_results = []
 
 for size in battery_sizes:
     cost_with_battery = optimize_battery_size(size)
 
-    results.append({
+    battery_results.append({
         "Battery Size (kWh)": size,
         "Daily Cost ($)": cost_with_battery,
         "Daily Savings ($)": cost_no_battery - cost_with_battery
     })
 
-results = pd.DataFrame(results)
+battery_results = pd.DataFrame(battery_results)
 
-print(results)
+print(battery_results)
+
+
 
 
