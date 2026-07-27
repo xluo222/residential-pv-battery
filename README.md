@@ -32,7 +32,7 @@ And to activate:
 ```
 .venv\Scripts\activate.bat
 ```
-# Installation 
+# Installation prerequisites
 Upgrade `pip`:
 
 ```
