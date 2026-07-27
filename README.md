@@ -35,7 +35,7 @@ And to activate:
 # Installation 
 Upgrade `pip`:
 
-```bash
+```
 python -m pip install --upgrade pip
 ```
 
@@ -47,7 +47,7 @@ Install the required Python packages:
 * cvxpy
 * requests
   
-```bash
+```
 python -m pip install pandas numpy scipy matplotlib requests cvxpy
 ```
 
