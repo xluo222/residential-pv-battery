@@ -33,6 +33,12 @@ And to activate:
 .venv\Scripts\activate.bat
 ```
 # Installation 
+Upgrade `pip`:
+
+```bash
+python -m pip install --upgrade pip
+```
+
 Install the required Python packages:
 * numpy
 * scipy
@@ -41,9 +47,8 @@ Install the required Python packages:
 * cvxpy
 * requests
   
-Use this example to install the packages:
-```
-pip install pandas numpy scipy matplotlib requests cvxpy
+```bash
+python -m pip install pandas numpy scipy matplotlib requests cvxpy
 ```
 
 # Running code
