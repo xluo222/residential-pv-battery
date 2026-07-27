@@ -28,9 +28,13 @@ cd residential-pv-battery
 ```
 
 # Running code
-To view results from the cost optimization model for battery storage, run this code:
+To view results from the cost optimization model for battery storage for each season, run this code:
 ```
 python3 winter_cost_optimization.py
+```
+and this:
+```
+python3 summer_cost_optimization.py
 ```
 To see the calculations for the Fourier-smoothed residential load profiles, run this:
 ```
