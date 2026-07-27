@@ -1,13 +1,14 @@
 import os
 import requests
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # refer to https://developer.nlr.gov/docs/solar/pvwatts/v8/ for more information on API requests and their parameters
 
 PVWATTS_URL = "https://developer.nlr.gov/api/pvwatts/v8.json"
 
 # download one typical year of hourly PV generation from PVWatts V8
-def get_hourly_solar_generation(latitude: float, longitude: float, pv_capacity_kw: float = 6.0, tilt: float = 25.0, azimuth: float = 180.0):
+def get_hourly_solar_generation(latitude: float, longitude: float, pv_capacity_kw: float = 6.0, tilt: float = 30.0, azimuth: float = 180.0):
 
     # set API key in terminal
     api_key = os.getenv("NREL_API_KEY")
@@ -33,7 +34,7 @@ def get_hourly_solar_generation(latitude: float, longitude: float, pv_capacity_k
 
         # inverter/system assumptions
         "dc_ac_ratio": 1.2,
-        "inv_eff": 95.0, # read https://www.sciencedirect.com/topics/engineering/inverter-efficiency for more information on inverter efficiency
+        "inv_eff": 96.0, # read https://www.sciencedirect.com/topics/engineering/inverter-efficiency for more information on inverter efficiency
         "gcr": 0.4,
 
         # Request hourly output
@@ -71,7 +72,7 @@ def get_hourly_solar_generation(latitude: float, longitude: float, pv_capacity_k
 solar = get_hourly_solar_generation(
     latitude=32.87,
     longitude=-117.14,
-    pv_capacity_kw=6.0
+    pv_capacity_kw=12.0
 )
 
 # adding timestamps and a datetime column 
@@ -127,5 +128,32 @@ winter_solar.to_csv(
     index=False
 )
 
+plt.figure(figsize=(8,5))
+
+plt.plot(
+    summer_solar["hour"],
+    summer_solar["solar_kwh"],
+    label="Summer",
+    linewidth=2,
+    color='darkorchid'
+)
+
+plt.plot(
+    winter_solar["hour"],
+    winter_solar["solar_kwh"],
+    label="Winter",
+    linewidth=2,
+    color='orange'
+)
+
+plt.xlabel("Hour of Day")
+plt.ylabel("Solar Generation (kWh)")
+plt.title("Representative Weekday PV Generation Profiles")
+plt.xticks(range(0,24,2))
+plt.grid(True, alpha=0.3)
+plt.legend()
+
+plt.tight_layout()
+plt.savefig("seasonal_solar_profiles.png", dpi=300)
 
 
