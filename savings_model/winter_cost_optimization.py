@@ -4,11 +4,12 @@ import pandas as pd
 
 # reads winter tables from fourier_load.py containing the daily load, generation, and tou rates by the hour. 
 winter = pd.read_csv("winter_table.csv")
+winter_export = pd.read_csv("winter_export_profile.csv")
 
 load = winter["Load-Smoothed (kWh)"].values
 solar = winter["Solar (kWh)"].values
 price = winter["TOU Rate ($/kWh)"].values
-export_price = 0.06
+export_price = winter_export["export ($/kWh)"].values
 
 # runs through the list of different battery sizes to test out how much they would save
 def optimize_battery_size(battery_capacity):
