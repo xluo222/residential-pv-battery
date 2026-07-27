@@ -17,8 +17,7 @@ cd residential-pv-battery
 
 # Creating a virtual environment
 If using Linux or MacOS, run this code:
-```
-bash
+```bash
 python3 -m venv .venv
 ```
 To activate the environment, run this:
@@ -34,7 +33,7 @@ And to activate:
 .venv\Scripts\activate.bat
 ```
 # Installation 
-You will need to install these following packages on python in your terminal to successfully run the program
+Install the required Python packages:
 * numpy
 * scipy
 * matplotlib
