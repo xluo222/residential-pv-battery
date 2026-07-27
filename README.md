@@ -17,7 +17,7 @@ pip install pandas
 
 Additionally, this model requires access to the National Renewable Energy Laboratory (NREL) PVWatts API for the solar generation profiles. Please sign up for an API key here: https://developer.nlr.gov/signup/. Keep in mind that API keys are unique and should not be shared with others. Use this code to set the API key within your terminal: 
 ```
-export NREL_API_KEY = "your_actual_api_key"
+export NREL_API_KEY="your_actual_api_key"
 ```
 
 # Reproducibility 
@@ -30,7 +30,7 @@ cd residential-pv-battery
 # Running code
 To view results from the cost optimization model for battery storage, run this code:
 ```
-python3 cost_optimization.py
+python3 winter_cost_optimization.py
 ```
 To see the calculations for the Fourier-smoothed residential load profiles, run this:
 ```
