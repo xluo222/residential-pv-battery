@@ -84,7 +84,7 @@ def fourier_smooth(profile_df, harmonics):
 
 load = fourier_smooth(load, 500)
 
-# create summer profile 
+# create seasonal and annual profile 
 summer = (
     load.loc[load["season"] == "summer"]
     .groupby("hour", as_index=False)
@@ -94,7 +94,6 @@ summer = (
     })
 )
 
-# create winter profile
 winter = (
     load.loc[load["season"] == "winter"]
     .groupby("hour", as_index=False)
@@ -104,7 +103,6 @@ winter = (
     })
 )
 
-# create annual profile
 annual = (
     load
     .groupby("hour", as_index=False)
@@ -114,7 +112,6 @@ annual = (
     })
 )
 
-# prints the summer, winter, and annual Fourier-smoothed profiles
 print("\nSummer profile:")
 print(summer)
 
