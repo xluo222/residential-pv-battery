@@ -46,7 +46,7 @@ def calculate_daily_cost(profile, rate_function):
 
     profile["tou_rate"] = profile["hour"].apply(rate_function)
     profile["hourly_cost"] = (
-        profile["smooth"] * profile["tou_rate"]
+        profile["load_kwh"] * profile["tou_rate"]
     )
 
     return profile

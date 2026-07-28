@@ -242,7 +242,7 @@ print("Plot saved as san_diego_load_profiles.png")
 # creates a dataframe organized by the hour with the Fourier-smoothed residential load profile, solar generation profile (AC system output), and the time-of-use tariff rate. Divided between summer and winter. All values rounded to the nearest thousandth!
 summer_table = pd.DataFrame({
     "Hour": summer_combined["hour"],
-    "Load-Smoothed (kWh)": summer_combined["smooth"],
+    "Load (kWh)": summer_combined["load_kwh"],
     "Solar (kWh)": summer_combined["solar_kwh"],
     "TOU Rate ($/kWh)": summer_combined["tou_rate"]
 })
@@ -252,7 +252,7 @@ summer_table.to_csv("summer_table.csv", index=False)
 
 winter_table = pd.DataFrame({
     "Hour": winter_combined["hour"],
-    "Load-Smoothed (kWh)": winter_combined["smooth"],
+    "Load (kWh)": winter_combined["load_kwh"],
     "Solar (kWh)": winter_combined["solar_kwh"],
     "TOU Rate ($/kWh)": winter_combined["tou_rate"]
 })
