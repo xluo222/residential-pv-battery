@@ -6,7 +6,7 @@ import pandas as pd
 winter = pd.read_csv("winter_table.csv")
 winter_export = pd.read_csv("winter_export_profile.csv")
 
-load = winter["Load-Smoothed (kWh)"].values
+load = winter["Load (kWh)"].values
 solar = winter["Solar (kWh)"].values
 price = winter["TOU Rate ($/kWh)"].values
 export_price = winter_export["export ($/kWh)"].values
