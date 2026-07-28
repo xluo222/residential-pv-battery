@@ -183,13 +183,13 @@ print(summary)
 
 plt.figure(figsize=(10, 6))
 
-#plt.plot(
-    #summer["hour"],
-    #summer["load_kwh"],
-    #marker="o",
-    #linestyle="--",
-    #label="Summer average"
-#)
+plt.plot(
+    summer["hour"],
+    summer["load_kwh"],
+    marker="o",
+    linestyle="--",
+    label="Summer average"
+)
 
 plt.plot(
     summer["hour"],
@@ -198,13 +198,13 @@ plt.plot(
     label="Summer Fourier-smoothed"
 )
 
-#plt.plot(
-    #winter["hour"],
-    #winter["load_kwh"],
-    #marker="o",
-    #linestyle="--",
-    #label="Winter average"
-#)
+plt.plot(
+    winter["hour"],
+    winter["load_kwh"],
+    marker="o",
+    linestyle="--",
+    label="Winter average"
+)
 
 plt.plot(
     winter["hour"],
@@ -213,13 +213,13 @@ plt.plot(
     label="Winter Fourier-smoothed"
 )
 
-#plt.plot(
-    #annual["hour"],
-    #annual["load_kwh"],
-    #marker="o",
-    #linestyle="--",
-    #label="Annual average"
-#)
+plt.plot(
+    annual["hour"],
+    annual["load_kwh"],
+    marker="o",
+    linestyle="--",
+    label="Annual average"
+)
 
 plt.plot(
     annual["hour"],

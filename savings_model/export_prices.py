@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
 df = pd.read_csv("Current Year NBT Pricing Upload MIDAS.csv")
 
@@ -6,9 +7,7 @@ df.columns = df.columns.str.strip() # get rid of whitespace
 
 df["DateStart"] = pd.to_datetime(df["DateStart"], errors="coerce") # convert invalid values to just NaT
 
-start_year = df["DateStart"].dt.year.min()
-
-df = df[df["DateStart"].dt.year < start_year + 9] # legacy pricing only applies to next 9 years, only keep those
+df = df[df["DateStart"].dt.year.isin([2026, 2027, 2028])]
 df["month"] = df["DateStart"].dt.month
 
 # extract hour
@@ -54,9 +53,6 @@ winter_profile.rename(
     inplace=True
 )
 
-print(summer.groupby("hour")["Value"].agg(["min", "max", "mean", "std"]))
-print(winter.groupby("hour")["Value"].agg(["min", "max", "mean", "std"]))
-
 summer_profile.to_csv(
     "summer_export_profile.csv",
     index=False
@@ -67,44 +63,32 @@ winter_profile.to_csv(
     index=False
 )
 
-import matplotlib.pyplot as plt
-
 summer["year"] = summer["DateStart"].dt.year
 
-plt.figure(figsize=(10,6))
+plt.figure(figsize=(8,5))
 
-for year in sorted(summer["year"].unique()):
-    profile = (
-        summer[summer["year"] == year]
-        .groupby("hour")["Value"]
-        .mean()
-    )
+plt.plot(
+    summer_profile["hour"],
+    summer_profile["export ($/kWh)"],
+    linewidth=2,
+    label="Summer",
+    color="salmon"
+)
 
-    plt.plot(profile.index, profile.values, label=year)
-
-plt.xlabel("Hour")
-plt.ylabel("Export Credit ($/kWh)")
-plt.title("Summer Weekday Export Profiles by Year")
-plt.grid(True)
-plt.legend(title="Year", ncol=3)
-plt.savefig("summer_profiles", dpi=300)
-
-winter["year"] = winter["DateStart"].dt.year
-
-plt.figure(figsize=(10,6))
-
-for year in sorted(winter["year"].unique()):
-    profile = (
-        winter[winter["year"] == year]
-        .groupby("hour")["Value"]
-        .mean()
-    )
-
-    plt.plot(profile.index, profile.values, label=year)
+plt.plot(
+    winter_profile["hour"],
+    winter_profile["export ($/kWh)"],
+    linewidth=2,
+    label="Winter",
+    color="mediumseagreen"
+)
 
 plt.xlabel("Hour")
 plt.ylabel("Export Credit ($/kWh)")
-plt.title("Winter Weekday Export Profiles by Year")
+plt.title("Average Hourly Export Credit Rate (2026–2028)")
+plt.xticks(range(0, 24))
 plt.grid(True)
-plt.legend(title="Year", ncol=3)
-plt.savefig("winter_profiles.png", dpi=300)
+plt.legend()
+plt.tight_layout()
+
+plt.savefig("export_profile_2026_2028.png", dpi=300)
