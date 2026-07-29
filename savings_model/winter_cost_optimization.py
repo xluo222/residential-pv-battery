@@ -93,11 +93,6 @@ def optimize_battery_size(battery_capacity):
         discharge <= power_limit
     ]
 
-    constraints += [
-        charge[0] == 0,
-        discharge[0] == 0
-    ]
-
     # initial battery capacity (starts at the same place no matter battery size)
     constraints += [
         soc[0] == battery_capacity/2

@@ -93,11 +93,6 @@ def optimize_battery_size(battery_capacity):
         discharge <= power_limit
     ]
 
-    constraints += [
-        charge[0] == 0,
-        discharge[0] == 0
-    ]
-
     # initial battery capacity (starts at the same place no matter battery size)
     constraints += [
         soc[0] == battery_capacity/2
@@ -177,7 +172,7 @@ def optimize_battery_size(battery_capacity):
     )
 
     print(
-        "Net upfront battery cost: $",
+        "Net battery cost: $",
         round(net_battery_cost, 2)
     )
 
@@ -220,7 +215,7 @@ cost_no_battery = np.sum(
     - grid_export_no_battery * export_price
 )
 
-battery_sizes = [2, 6, 10, 12, 14, 18, 20]
+battery_sizes = [4, 6, 10, 12, 14, 16, 20]
 
 battery_results = []
 
@@ -249,7 +244,7 @@ for size in battery_sizes:
         "Original Battery Cost ($)":
             result["original_battery_cost"],
 
-        "Net  Battery Cost ($)":
+        "Net Battery Cost ($)":
             result["net_battery_cost"],
 
         "Annualized Capital Cost ($/year)":
