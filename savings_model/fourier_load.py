@@ -179,7 +179,7 @@ summary = pd.DataFrame({
 
 print(summary)
 
-# plot the Fourier-smoothed average profiles (commented out the averages of profiles, used originally to compare against the Fourier-smoothed values). loads as a png file. 
+# plot the Fourier-smoothed profiles and regular averaged ones(commented out the Fourier-smoothed profiles, used  to compare against the averaed values). loads as a png file. 
 
 plt.figure(figsize=(10, 6))
 
@@ -188,45 +188,48 @@ plt.plot(
     summer["load_kwh"],
     marker="o",
     linestyle="--",
-    label="Summer average"
+    label="Summer average",
+    color="orange"
 )
 
-plt.plot(
-    summer["hour"],
-    summer["smooth"],
-    linewidth=2,
-    label="Summer Fourier-smoothed"
-)
+#plt.plot(
+    #summer["hour"],
+    #summer["smooth"],
+    #linewidth=2,
+    #label="Summer Fourier-smoothed"
+#)
 
 plt.plot(
     winter["hour"],
     winter["load_kwh"],
     marker="o",
     linestyle="--",
-    label="Winter average"
+    label="Winter average",
+    color="deepskyblue"
 )
 
-plt.plot(
-    winter["hour"],
-    winter["smooth"],
-    linewidth=2,
-    label="Winter Fourier-smoothed"
-)
+#plt.plot(
+    #winter["hour"],
+    #winter["smooth"],
+    #linewidth=2,
+    #label="Winter Fourier-smoothed"
+#)
 
 plt.plot(
     annual["hour"],
     annual["load_kwh"],
     marker="o",
     linestyle="--",
-    label="Annual average"
+    label="Annual average",
+    color="mediumaquamarine"
 )
 
-plt.plot(
-    annual["hour"],
-    annual["smooth"],
-    linewidth=2,
-    label="Annual Fourier-smoothed"
-)
+#plt.plot(
+    #annual["hour"],
+    #annual["smooth"],
+    #linewidth=2,
+    #label="Annual Fourier-smoothed"
+#)
 
 plt.xlabel("Hour of day")
 plt.ylabel("Average electricity use (kWh)")
