@@ -1,6 +1,7 @@
 import numpy as np
 import cvxpy as cp
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # reads summer tables from fourier_load.py containing the daily load, generation, and tou rates by the hour. 
 summer = pd.read_csv("summer_table.csv")
@@ -15,24 +16,19 @@ cost_per_kwh = 800
 fixed_installation_cost = 0
 discount_rate=  0.07
 battery_lifetime_years = 10
-incentive_fraction = 0.30
+sgip_incentive = 200 # per kWh
 
-# calculates the battery's original upfront cost and cost after incentives (like ITC)
+# calculates the battery's original upfront cost and cost after incentives (like SGIP)
 def calculate_battery_capital_cost(battery_capacity):
     original_battery_cost = (
-        battery_capacity * cost_per_kwh
+        battery_capacity * (cost_per_kwh - sgip_incentive)
         + fixed_installation_cost
     )
 
-    net_battery_cost = (
-        original_battery_cost
-        * (1 - incentive_fraction)
-    )
-
-    return original_battery_cost, net_battery_cost
+    return original_battery_cost
 
 # converts net battery cost into equivalent annual cost using the capital recovery factor
-def annualize_battery_cost(net_battery_cost):
+def annualize_battery_cost(battery_cost):
     r = discount_rate
     n = battery_lifetime_years
 
@@ -45,7 +41,7 @@ def annualize_battery_cost(net_battery_cost):
         )
 
     annualized_cost = (
-        net_battery_cost
+        battery_cost
         * capital_recovery_factor
     )
 
@@ -57,20 +53,6 @@ def optimize_battery_size(battery_capacity):
     power_limit = battery_capacity/2 # represents how much the battery can charge/discharge in an hour
     eta_c = 0.95 # efficiency charging/discharging
     eta_d = 0.95
-
-    # battery capital costs for this specific capacity
-    original_battery_cost, net_battery_cost = (
-        calculate_battery_capital_cost(battery_capacity)
-    )
-
-    annualized_capital_cost = annualize_battery_cost(
-        net_battery_cost
-    )
-
-    # the dispatch model represents one day, so convert the annualized cost into an equivalent daily cost.
-    daily_amortized_capital_cost = (
-        annualized_capital_cost / 365
-    )
     
     # optimization variables
     charge = cp.Variable(n, nonneg=True)
@@ -122,7 +104,6 @@ def optimize_battery_size(battery_capacity):
 
     objective = cp.Minimize(
         electricity_cost
-        + daily_amortized_capital_cost
     )
     
     problem = cp.Problem(objective, constraints)
@@ -163,46 +144,17 @@ def optimize_battery_size(battery_capacity):
     print("Net daily cost: $", round(net_cost.sum(), 2))
     
     daily_operating_cost = net_cost.sum()
-
-    daily_total_cost = (daily_operating_cost + daily_amortized_capital_cost)
-
+    
     print(
-        "Original battery cost: $",
-        round(original_battery_cost, 2)
-    )
-
-    print(
-        "Net battery cost: $",
-        round(net_battery_cost, 2)
-    )
-
-    print(
-        "Annualized capital cost: $",
-        round(annualized_capital_cost, 2),
-        "per year"
-    )
-
-    print(
-        "Daily amortized capital cost: $",
-        round(daily_amortized_capital_cost, 2)
-    )
-
-    print(
-        "Total objective cost: $",
-        round(daily_total_cost, 2),
+        "Daily operating cost: $",
+        round(daily_operating_cost, 2),
         "per day"
     )
 
     return {
         "daily_operating_cost": daily_operating_cost,
-        "daily_capital_cost": daily_amortized_capital_cost,
-        "daily_total_cost": daily_total_cost,
-        "original_battery_cost": original_battery_cost,
-        "net_battery_cost": net_battery_cost,
-        "annualized_capital_cost": annualized_capital_cost
     }
-
-            
+     
 # comparing the results against the no battery case
 
 net_load = load - solar
@@ -215,22 +167,33 @@ cost_no_battery = np.sum(
     - grid_export_no_battery * export_price
 )
 
-battery_sizes = [4, 6, 10, 12, 14, 16, 20]
+battery_sizes = [4, 6, 10, 12, 14, 18, 20]
 
 battery_results = []
 
 for size in battery_sizes:
     result = optimize_battery_size(size)
 
+      # battery capital costs for this specific capacity
+    original_battery_cost = (
+        calculate_battery_capital_cost(size)
+    )
+
+    annualized_capital_cost = annualize_battery_cost(
+        original_battery_cost
+    )
+
+    # the dispatch model represents one day, so convert the annualized cost into an equivalent daily cost.
+    daily_amortized_capital_cost = (
+        annualized_capital_cost / 365
+    )
+
     operational_savings = (
         cost_no_battery
         - result["daily_operating_cost"]
     )
 
-    net_daily_benefit = (
-        cost_no_battery
-        - result["daily_total_cost"]
-    )
+    net_benefit = operational_savings - daily_amortized_capital_cost
 
     battery_results.append({
         "Battery Size (kWh)": size,
@@ -242,19 +205,16 @@ for size in battery_sizes:
             operational_savings,
 
         "Original Battery Cost ($)":
-            result["original_battery_cost"],
-
-        "Net Battery Cost ($)":
-            result["net_battery_cost"],
+            original_battery_cost,
 
         "Annualized Capital Cost ($/year)":
-            result["annualized_capital_cost"],
+            annualized_capital_cost,
 
         "Daily Amortized Capital Cost ($)":
-            result["daily_capital_cost"],
+            daily_amortized_capital_cost,
 
-        "Total Objective Cost ($/day)": # operating cost + amortized capital cost, find lowest!
-            result["daily_total_cost"]
+        "Net benefit ($/day)":
+            net_benefit
     })
 
 battery_results = pd.DataFrame(battery_results)
@@ -264,8 +224,8 @@ battery_results = battery_results.round(3)
 battery_results.to_csv("summer_battery_results.csv", index=False)
 
 optimal_index = battery_results[
-    "Total Objective Cost ($/day)"
-].idxmin()
+    "Net benefit ($/day)"
+].idxmax()
 
 optimal_battery = battery_results.loc[optimal_index]
 
@@ -275,5 +235,20 @@ print(battery_results)
 print("\nOptimal battery size:")
 print(optimal_battery)
 
+# graphing the battery size vs net benefit curve
+plt.figure(figsize=(7,5))
 
+plt.plot(
+    battery_results["Battery Size (kWh)"],
+    battery_results["Net benefit ($/day)"],
+    marker="o",
+    color="palevioletred"
+)
 
+plt.xlabel("Battery Capacity (kWh)")
+plt.ylabel("Daily Net Benefit ($)")
+plt.title("Net Benefit vs. Battery Capacity")
+
+plt.grid(True)
+
+plt.savefig("summer_net_benefit_vs_capacity.png", dpi=300)

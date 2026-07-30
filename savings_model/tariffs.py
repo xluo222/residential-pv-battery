@@ -57,7 +57,7 @@ def calculate_daily_cost(profile, rate_function):
 #print(sdge_rates_df)
 
 #sdge_schedule_df = pd.read_csv(
-    "sdge_weekday.csv"
+    #"sdge_weekday.csv"
 #)
 
 #print(sdge_schedule_df)
