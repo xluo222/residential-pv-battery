@@ -95,6 +95,15 @@ bibtex main
 pdflatex main.tex
 pdflatex main.tex
 ```
+The compiled PDF will be saved as:
+
+source_files/main.pdf
+
+Alternatively, if latexmk is installed, the paper can be compiled with a single command:
+```
+latexmk -pdf main.tex
+```
+Make sure all required .png figures and the .bib bibliography file are available at the paths referenced by the LaTeX source before compiling.
 # Building slides
 Stay in the source_files directory and compile the slides LaTeX file using:
 ```
