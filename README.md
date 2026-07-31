@@ -79,12 +79,12 @@ python3 export_prices.py
 ```
 which produces `summer_export_profile.csv` and `winter_export_profile.csv`. Also,`export_prices.py` uses the `Current Year NBT Pricing Upload MIDAS.csv` data and `solar_generation_profiles.py`can be run using the `pvwatts_raw_response.json`, or ran using data from an API call. 
 
-# Building the paper
+# Building the paper and slides
 Navigate to the source_files directory:
 ```
 cd source_files
 ```
-Compile the main LaTeX file using:
+Compile the main LaTeX file (report) using:
 ```
 pdflatex main.tex
 ```
@@ -92,17 +92,10 @@ Since the paper uses a BibTeX bibliography, run:
 ```
 bibtex main
 ```
-The compiled PDF will be saved as:
+The compiled PDF will be saved as `main.pdf`
 
-source_files/main.pdf
-
-Alternatively, if latexmk is installed, the paper can be compiled with a single command:
+To open up the pdf, run:
 ```
-latexmk -pdf main.tex
+xdg-open main.pdf
 ```
-Make sure all required .png figures and the .bib bibliography file are available at the paths referenced by the LaTeX source before compiling.
-# Building slides
-Stay in the source_files directory and compile the slides LaTeX file using:
-```
-pdflatex slides.tex
-```
+The exact same process applies for building the slides, but switch out `main` with `slides` instead. 
