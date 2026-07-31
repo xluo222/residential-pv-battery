@@ -53,6 +53,7 @@ python -m pip install pandas numpy scipy matplotlib requests cvxpy
 # Running code
 To view results from the cost optimization model for battery storage for each season, run this code:
 ```
+cd savings_model
 python3 winter_cost_optimization.py
 ```
 and this:
