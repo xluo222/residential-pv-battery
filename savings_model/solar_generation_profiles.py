@@ -17,48 +17,49 @@ def get_hourly_solar_generation(latitude: float, longitude: float, pv_capacity_k
     # set API key in terminal
     api_key = os.getenv("NREL_API_KEY")
 
-    if not api_key:
-        raise RuntimeError(
-            "NREL_API_KEY is not set. Set it in your terminal first."
+    if api_key: 
+        # parameters for the API request
+        params = {
+            "api_key": api_key,
+            "lat": latitude,
+            "lon": longitude,
+            
+            # PV system assumptions 
+            "system_capacity": pv_capacity_kw,
+            "tilt": tilt,
+            "azimuth": azimuth,
+            "array_type": 1,  # fixed roof mount
+            "module_type": 0,  # standard module
+            "losses": 14.0, # default assumption in PVWatts calculator is 14%
+            
+            # inverter/system assumptions
+            "dc_ac_ratio": 1.2,
+            "inv_eff": 96.0, # read https://www.sciencedirect.com/topics/engineering/inverter-efficiency for more information on inverter efficiency
+            "gcr": 0.4,
+            
+            # Request hourly output
+            "timeframe": "hourly",
+            "dataset": "nsrdb",
+            "radius": 100   # PVWatts searches within 100 miles
+        }
+        
+        response = requests.get(
+            PVWATTS_URL,
+            params=params,
+            timeout=60
         )
+        
+        print(response.status_code) # 200 if connection works, 4xx or 5xx if not
+        data = response.json()
+        
+        # save raw PVWatts API response
+        with open("data_files/pvwatts_raw_response.json", "w") as file:
+            json.dump(data, file, indent=4)
 
-    # parameters for the API request
-    params = {
-        "api_key": api_key,
-        "lat": latitude,
-        "lon": longitude,
-
-        # PV system assumptions 
-        "system_capacity": pv_capacity_kw,
-        "tilt": tilt,
-        "azimuth": azimuth,
-        "array_type": 1,  # fixed roof mount
-        "module_type": 0,  # standard module
-        "losses": 14.0, # default assumption in PVWatts calculator is 14%
-
-        # inverter/system assumptions
-        "dc_ac_ratio": 1.2,
-        "inv_eff": 96.0, # read https://www.sciencedirect.com/topics/engineering/inverter-efficiency for more information on inverter efficiency
-        "gcr": 0.4,
-
-        # Request hourly output
-        "timeframe": "hourly",
-        "dataset": "nsrdb",
-        "radius": 100   # PVWatts searches within 100 miles
-    }
-
-    response = requests.get(
-        PVWATTS_URL,
-        params=params,
-        timeout=60
-    )
-
-    print(response.status_code) # 200 if connection works, 4xx or 5xx if not
-    data = response.json()
-    
-    # save raw PVWatts API response
-    with open("data_files/pvwatts_raw_response.json", "w") as file:
-        json.dump(data, file, indent=4)
+    else:
+        # no api_key, use previously downloaded data
+        with open("data_files/pvwatts_raw_response.json", "r") as file:
+            data = json.load(file)
         
     ac_watts = data["outputs"]["ac"]
     
