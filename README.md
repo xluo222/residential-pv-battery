@@ -78,3 +78,18 @@ python3 export_prices.py
 which produces `summer_export_profile.csv` and `winter_export_profile.csv`
 
 # Building the paper
+Navigate to the source_files directory:
+```
+cd source_files
+```
+Compile the main LaTeX file using:
+```
+pdflatex main.tex
+```
+Since the paper uses a BibTeX bibliography, run:
+```
+pdflatex main.tex
+bibtex main
+pdflatex main.tex
+pdflatex main.tex
+```
