@@ -65,6 +65,8 @@ To see the calculations for the Fourier-smoothed residential load profiles, run 
 ```
 python3 fourier_load.py
 ```
+which produces `winter_table.csv` and `summer_table.csv`
+
 and to see those calculations graphed, run this:
 ```
 xdg-open san_diego_load_profiles.png
@@ -73,11 +75,6 @@ To see the export credit rates, run this:
 ```
 python3 export_prices.py
 ```
-and to view the export prices for each season, run this:
-```
-xdg-open summer_export_profile.csv
-```
-or this:
-```
-xdg-open winter_export_profile.csv
-```
+which produces `summer_export_profile.csv` and `winter_export_profile.csv`
+
+# Building the paper
