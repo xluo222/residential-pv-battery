@@ -59,12 +59,25 @@ and this:
 ```
 python3 summer_cost_optimization.py
 ```
+which produces `winter_battery_results.csv` and `summer_battery_results.csv`
 
 To see the calculations for the Fourier-smoothed residential load profiles, run this:
 ```
 python3 fourier_load.py
 ```
-and to see the graphed daily load profiles, run this:
+and to see those calculations graphed, run this:
 ```
 xdg-open san_diego_load_profiles.png
+```
+To see the export credit rates, run this:
+```
+python3 export_prices.py
+```
+and to view the export prices for each season, run this:
+```
+xdg-open summer_export_profile.csv
+```
+or this:
+```
+xdg-open winter_export_profile.csv
 ```
