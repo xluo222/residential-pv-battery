@@ -60,7 +60,7 @@ and this:
 python3 summer_cost_optimization.py
 ```
 which produces `winter_battery_results.csv` and `summer_battery_results.csv`
-
+Feel free to mess around with the battery capacities and optimization variables and constraints in the two python files above. 
 To see the calculations for the Fourier-smoothed residential load profiles, run this:
 ```
 python3 fourier_load.py
@@ -71,11 +71,14 @@ and to see those calculations graphed, run this:
 ```
 xdg-open san_diego_load_profiles.png
 ```
-To see the export credit rates, run this:
+The load profiles use the `USA_CA_San.Diego-Miramar.NAS.722930_TMY3_BASE.csv` data. 
+To see the export credit rates for the San Diego region, run this:
 ```
 python3 export_prices.py
 ```
 which produces `summer_export_profile.csv` and `winter_export_profile.csv`
+`export_prices.py`uses the `Current Year NBT Pricing Upload MIDAS.csv` data. 
+`solar_generation_profiles.py`can be run using the `pvwatts_raw_response.json`, or ran using data from an API call. 
 
 # Building the paper
 Navigate to the source_files directory:
