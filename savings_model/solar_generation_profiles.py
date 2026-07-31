@@ -4,7 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import json
 
-# The function below uses data from an API request. If you'd liked to access it directly yourself, please create an API key following the instructions from the README file. However, an API key is not necessary as the necessary data is also in the data_files folder.
+# The function below uses data from an API request. If you'd liked to access it directly yourself, please create an API key following the instructions from the README file.
+# However, an API key is not necessary as the necessary data is also in the data_files folder.
 
 # refer to https://developer.nlr.gov/docs/solar/pvwatts/v8/ for more information on API requests and their parameters
 
