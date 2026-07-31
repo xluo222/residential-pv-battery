@@ -95,3 +95,8 @@ bibtex main
 pdflatex main.tex
 pdflatex main.tex
 ```
+# Building slides
+Stay in the source_files directory and compile the slides LaTeX file using:
+```
+pdflatex slides.tex
+```
