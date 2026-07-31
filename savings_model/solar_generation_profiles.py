@@ -53,12 +53,12 @@ def get_hourly_solar_generation(latitude: float, longitude: float, pv_capacity_k
         data = response.json()
         
         # save raw PVWatts API response
-        with open("data_files/pvwatts_raw_response.json", "w") as file:
+        with open("pvwatts_raw_response.json", "w") as file:
             json.dump(data, file, indent=4)
 
     else:
         # no api_key, use previously downloaded data
-        with open("data_files/pvwatts_raw_response.json", "r") as file:
+        with open("xpvwatts_raw_response.json", "r") as file:
             data = json.load(file)
         
     ac_watts = data["outputs"]["ac"]
