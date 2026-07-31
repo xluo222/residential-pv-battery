@@ -90,10 +90,7 @@ pdflatex main.tex
 ```
 Since the paper uses a BibTeX bibliography, run:
 ```
-pdflatex main.tex
 bibtex main
-pdflatex main.tex
-pdflatex main.tex
 ```
 The compiled PDF will be saved as:
 
