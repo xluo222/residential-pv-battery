@@ -56,8 +56,12 @@ def get_hourly_solar_generation(latitude: float, longitude: float, pv_capacity_k
     print(response.status_code) # 200 if connection works, 4xx or 5xx if not
     data = response.json()
     
+    # save raw PVWatts API response
+    with open("data_files/pvwatts_raw_response.json", "w") as file:
+        json.dump(data, file, indent=4)
+        
     ac_watts = data["outputs"]["ac"]
-
+    
     if len(ac_watts) != 8760:
         raise ValueError(
             f"Expected 8,760 hourly values, received {len(ac_watts)}."
