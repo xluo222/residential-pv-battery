@@ -76,7 +76,7 @@ To see the export credit rates for the San Diego region, run this:
 ```
 python3 export_prices.py
 ```
-which produces `summer_export_profile.csv` and `winter_export_profile.csv`
+which produces `summer_export_profile.csv` and `winter_export_profile.csv`\n
 `export_prices.py`uses the `Current Year NBT Pricing Upload MIDAS.csv` data. 
 `solar_generation_profiles.py`can be run using the `pvwatts_raw_response.json`, or ran using data from an API call. 
 
