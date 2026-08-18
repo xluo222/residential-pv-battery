@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import json
 
 # The function below uses data from an API request. If you'd liked to access it directly yourself, please create an API key following the instructions from the README file.
-# However, an API key is not necessary as the necessary data is also in the data_files folder.
 
 # refer to https://developer.nlr.gov/docs/solar/pvwatts/v8/ for more information on API requests and their parameters
 
@@ -14,74 +13,68 @@ PVWATTS_URL = "https://developer.nlr.gov/api/pvwatts/v8.json"
 # download one typical year of hourly PV generation from PVWatts V8
 def get_hourly_solar_generation(latitude: float, longitude: float, pv_capacity_kw: float = 6.0, tilt: float = 30.0, azimuth: float = 180.0):
 
-    # set API key in terminal
     api_key = os.getenv("NREL_API_KEY")
 
-    if api_key: 
-        # parameters for the API request
-        params = {
-            "api_key": api_key,
-            "lat": latitude,
-            "lon": longitude,
-            
-            # PV system assumptions 
-            "system_capacity": pv_capacity_kw,
-            "tilt": tilt,
-            "azimuth": azimuth,
-            "array_type": 1,  # fixed roof mount
-            "module_type": 0,  # standard module
-            "losses": 14.0, # default assumption in PVWatts calculator is 14%
-            
-            # inverter/system assumptions
-            "dc_ac_ratio": 1.2,
-            "inv_eff": 96.0, # read https://www.sciencedirect.com/topics/engineering/inverter-efficiency for more information on inverter efficiency
-            "gcr": 0.4,
-            
-            # Request hourly output
-            "timeframe": "hourly",
-            "dataset": "nsrdb",
-            "radius": 100   # PVWatts searches within 100 miles
-        }
-        
-        response = requests.get(
-            PVWATTS_URL,
-            params=params,
-            timeout=60
+    if not api_key:
+        raise ValueError(
+            "NREL_API_KEY environment variable is not set. "
         )
+    
+    # parameters for the API request
+    params = {
+        "api_key": api_key,
+        "lat": latitude,
+        "lon": longitude,
         
-        print(response.status_code) # 200 if connection works, 4xx or 5xx if not
-        data = response.json()
+        # PV system assumptions 
+        "system_capacity": pv_capacity_kw,
+        "tilt": tilt,
+        "azimuth": azimuth,
+        "array_type": 1,  # fixed roof mount
+        "module_type": 0,  # standard module
+        "losses": 14.0, # default assumption in PVWatts calculator is 14%
         
-        # save raw PVWatts API response
-        with open("pvwatts_raw_response.json", "w") as file:
-            json.dump(data, file, indent=4)
-
-    else:
-        # no api_key, use previously downloaded data
-        with open("pvwatts_raw_response.json", "r") as file:
-            data = json.load(file)
+        # inverter/system assumptions
+        "dc_ac_ratio": 1.2,
+        "inv_eff": 96.0, # read https://www.sciencedirect.com/topics/engineering/inverter-efficiency for more information on inverter efficiency
+        "gcr": 0.4,
         
+        # Request hourly output
+        "timeframe": "hourly",
+        "dataset": "nsrdb",
+        "radius": 100   # PVWatts searches within 100 miles
+    }
+        
+    response = requests.get(
+        PVWATTS_URL,
+        params=params,
+        timeout=60
+    )
+    
+    print(response.status_code) # 200 if connection works, 4xx or 5xx if not
+    data = response.json()
+    
     ac_watts = data["outputs"]["ac"]
     
     if len(ac_watts) != 8760:
         raise ValueError(
             f"Expected 8,760 hourly values, received {len(ac_watts)}."
         )
-
+    
     solar = pd.DataFrame({
         "solar_ac_w": ac_watts
     })
-
+    
     # each value is average AC system output power over a one-hour interval.
     # W ÷ 1000 = kW, and kW × 1 hour = kWh.
     solar["solar_kwh"] = solar["solar_ac_w"] / 1000
-
+    
     return solar
 
 solar = get_hourly_solar_generation(
     latitude=32.87,
     longitude=-117.14,
-    pv_capacity_kw=12.0
+    pv_capacity_kw=6.0
 )
 
 # adding timestamps and a datetime column 
