@@ -91,9 +91,10 @@ solar["is_weekday"] = solar["day_of_week"] < 5
 
 # same format as the tou tariffs. June to October is one price and November through May is another. 
 def season(month):
-    if month in [6,7,8,9,10]:
+    if month in [6,7,8]:
         return "summer"
-    return "winter"
+    elif month in [12,1,2]:
+        return "winter"
 
 solar["season"] = solar["month"].apply(season)
 
