@@ -121,21 +121,27 @@ print(winter)
 print("\nAnnual profile:")
 print(annual)
 
-# read the summer and winter solar profiles from solar_generation_profiles.py. summer and winter daily solar generation profiles measured in terms of AC system output (
+# read the summer and winter solar profiles from solar_generation_profiles.py. summer and winter daily solar generation profiles measured in terms of AC system output. also reads the summer and winter export profiles from export_profiles.py
 summer_solar = pd.read_csv("summer_solar_profile.csv")
 winter_solar = pd.read_csv("winter_solar_profile.csv")
+summer_export = pd.read_csv("summer_export_profile.csv")
+winter_export = pd.read_csv("winter_export_profile.csv")
 
-# merge the summer + winter solar PV generation profiles with the load profiles
+# merge the summer + winter solar PV generation & export pricing profiles with the load profiles
 summer_combined = summer.merge(
     summer_solar,
-    on="hour",
-    how="inner" # only keeps rows where the key exists in both dataframes
+    on="hour"
+).merge(
+    summer_export,
+    on="hour"
 )
 
 winter_combined = winter.merge(
     winter_solar,
-    on="hour",
-    how="inner",
+    on="hour"
+).merge(
+    winter_export,
+    on="hour"
 )
 
 # functions used to calculate daily costs of electricity according to the Fourier-smoothed residential load values from above
@@ -247,7 +253,8 @@ summer_table = pd.DataFrame({
     "Hour": summer_combined["hour"],
     "Load (kWh)": summer_combined["load_kwh"],
     "Solar (kWh)": summer_combined["solar_kwh"],
-    "TOU Rate ($/kWh)": summer_combined["tou_rate"]
+    "TOU Rate ($/kWh)": summer_combined["tou_rate"],
+    "Export Price ($/kWh)": summer_combined["export ($/kWh)"]
 })
 
 # saves it as a csv for use in cost optimization model
@@ -257,7 +264,8 @@ winter_table = pd.DataFrame({
     "Hour": winter_combined["hour"],
     "Load (kWh)": winter_combined["load_kwh"],
     "Solar (kWh)": winter_combined["solar_kwh"],
-    "TOU Rate ($/kWh)": winter_combined["tou_rate"]
+    "TOU Rate ($/kWh)": winter_combined["tou_rate"],
+    "Export Price ($/kWh)": winter_combined["export ($/kWh)"]
 })
 
 winter_table.to_csv("winter_table.csv",index=False)
