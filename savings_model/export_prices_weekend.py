@@ -23,7 +23,7 @@ hourly = (
 )
 
 hourly["weekday"] = hourly["DateStart"].dt.weekday
-hourly = hourly[hourly["weekday"] < 5]
+hourly = hourly[hourly["weekday"] >= 5]
 
 summer = hourly[
     hourly["DateStart"].dt.month.isin([6,7,8])
@@ -33,7 +33,7 @@ winter = hourly[
     hourly["DateStart"].dt.month.isin([12,1,2])
 ]
 
-# take the average export credit by hour for summer and winter
+# take the average export credit by hour for summer and winter weekends (since the rates are different weekend vs weekday)
 summer_profile = (
     summer.groupby("hour")["Value"]
           .mean()
@@ -57,12 +57,12 @@ winter_profile.rename(
 )
 
 summer_profile.to_csv(
-    "summer_export_profile.csv",
+    "summer_export_weekend_profile.csv",
     index=False
 )
 
 winter_profile.to_csv(
-    "winter_export_profile.csv",
+    "winter_export_weekend_profile.csv",
     index=False
 )
 
